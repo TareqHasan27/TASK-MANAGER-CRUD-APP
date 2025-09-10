@@ -3,7 +3,7 @@ const { validateTaskInput, VALID_STATUSES } = require("../helpers/validationHelp
 
 let tasks = [];
 
-// Utility: generate next id safely
+// generate next id safely
 function generateId() {
   return tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
 }
@@ -111,12 +111,27 @@ function updateTaskStatus(req, res) {
   const task = tasks.find(t => t.id === parseInt(req.params.id));
   if (!task) return sendResponse(res.status(404), false, "Task not found");
 
-  const { status } = req.body;
-  if (!status || !VALID_STATUSES.includes(status)) {
-    return sendResponse(res.status(400), false, "Invalid status value");
+  const { status , title , description } = req.body;
+
+  if (status !== undefined) {
+    if (!VALID_STATUSES.includes(status)) {
+      return sendResponse(res.status(400), false, "Invalid status value");
+    }
+    task.status = status;
   }
 
-  task.status = status;
+  if (title !== undefined) {
+    if (title.trim() === "") {
+      return sendResponse(res.status(400), false, "Title cannot be empty");
+    }
+    task.title = title;
+  }
+
+  if (description !== undefined) {
+    task.description = description;
+  }
+
+
   sendResponse(res, true, "Task status updated successfully", task);
 }
 
